@@ -22,5 +22,7 @@ public class MyFirstServlet extends HttpServlet {
 		
 		PrintWriter out = resp.getWriter();
 		out.println("<h1>The Date is : "+ new Date() +"</h1>");
+		
+		out.println("The name is : "+firstname+" "+lastname);
 	}
 }
