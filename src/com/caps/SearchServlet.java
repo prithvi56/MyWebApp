@@ -4,6 +4,7 @@ import java.io.IOException;
 import java.io.PrintWriter;
 import java.sql.Connection;
 import java.sql.DriverManager;
+import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.sql.Statement;
@@ -16,14 +17,19 @@ import javax.servlet.http.HttpServletResponse;
 
 import com.mysql.jdbc.Driver;
 
-@WebServlet("/ViewAllStudents")
-public class ViewAllStudents extends HttpServlet {
+
+@WebServlet("/SearchServlet")
+public class SearchServlet extends HttpServlet {
 	@Override
-	protected void doGet(HttpServletRequest req, HttpServletResponse resp) throws ServletException, IOException {
+	protected void doPost(HttpServletRequest req, HttpServletResponse resp) throws ServletException, IOException {
+		String sid_search = req.getParameter("search");
+		
 		PrintWriter out = resp.getWriter();
+		int val = (int) Math.random()*100;
 		Connection con = null;
 		Statement stmt = null;
 		ResultSet rs = null;
+		PreparedStatement pstmt = null;
 		try {
 			/*
 			 * 1. Load the Driver
@@ -44,14 +50,12 @@ public class ViewAllStudents extends HttpServlet {
 			/*
 			 * 3. Issue the SQL query via connection
 			 */
-			String sql = "select * from students_info";
+			String sql = "select sid,firstname,lastname,gender,type from students_info where sid=?";
 
-			stmt = con.createStatement();
-			rs = stmt.executeQuery(sql);
-
-			/*
-			 * 4. Process the results
-			 */
+			pstmt = con.prepareStatement(sql);
+			pstmt.setInt(1, Integer.parseInt(sid_search));
+			rs = pstmt.executeQuery();
+			
 			out.print("<html>");
 			out.print("<body>");
 			out.print("<h1 align=center>View All Students Info</h1>");
@@ -60,7 +64,7 @@ public class ViewAllStudents extends HttpServlet {
 			out.print("<tr><th>Sid</th> <th>firstname</th> <th>lastname</th> "+
 			"<th>gender</th> <th>password</th> <th>type</th>");
 						
-			while(rs.next()){
+			if(rs.next()){
 				
 				out.print("<tr><td align=center>"+rs.getInt("sid")+"</td>"
 						+"<td align=center>"+ rs.getString("firstname")+ "</td>"
@@ -81,23 +85,20 @@ public class ViewAllStudents extends HttpServlet {
 			try {
 				con.close();
 			} catch (SQLException e) {
-				// TODO Auto-generated catch block
 				e.printStackTrace();
 			}
 			try {
-				stmt.close();
+				pstmt.close();
 			} catch (SQLException e) {
-				// TODO Auto-generated catch block
 				e.printStackTrace();
 			}
 			try {
 				rs.close();
 			} catch (SQLException e) {
-				// TODO Auto-generated catch block
 				e.printStackTrace();
 			}
 		}
 
-	}
+	}	
 }
-
+			
